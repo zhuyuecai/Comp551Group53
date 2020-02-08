@@ -26,10 +26,9 @@ def printGraphs(adata):
     plt.subplot(2, 3, 6)
     sns.distplot(adata['hours-per-week'])
   
-#import ionosphere data
+#import adult data & adult test
 adata = pd.read_table("adult.data", sep=',', header=None, names=['age', 'workclass', 'fnlwgt', 'education', 'educational-num','marital-status', 'occupation', 'relationship', 'race', 'gender','capital-gain', 'capital-loss', 'hours-per-week', 'native-country','income'])
 atest = pd.read_csv('adulttest.txt', sep=",\s", header=None, names = ['age', 'workclass', 'fnlwgt', 'education', 'educational-num','marital-status', 'occupation', 'relationship', 'race', 'gender','capital-gain', 'capital-loss', 'hours-per-week', 'native-country','income'], engine = 'python')
-
 
 
 #convert variables from int to float and make them categorical
@@ -38,7 +37,7 @@ for col in set(adata.columns) - set(adata.describe().columns):
 for col in set(atest.columns) - set(atest.describe().columns):
     atest[col] = atest[col].astype('category')
 atest['income'].replace(regex=True,inplace=True,to_replace=r'\.',value=r'')
-#for some reason test ended with a . for income
+#for some reason test file ended with a '.' for income
             
 # Get basic statistics:
 print("Analyze the data first \n")
@@ -58,10 +57,12 @@ print("New shape is: " ,adata.shape)
 correlation = adata.corr()
 plt.figure(figsize=(12, 12))
 print("Also let's check the correlation, to see if there are any patterns to note")
-print("Correlation heatmap might take a while")
-sns.heatmap(correlation,annot=True, linewidths=0.5, linecolor="white",vmin=-0.7, cmap="PuOr")
-print("There aren't any useful correlations\n Finally let's check for any outliers in each column \n")
+ax=sns.heatmap(correlation,annot=True, linewidths=0.5, linecolor="white",vmin=-0.7, cmap="PuOr")
+ax.set_ylim(6.0, 0)
+plt.show()
+print("There aren't any useful correlations\n Let's check for any outliers in each column \n")
 printGraphs(adata) #fork in an ideal world but os module doesn't work on Windows
+plt.show()
 
 print("Finally, convert to a Numpy arrays")
 traindata=np.array(adata.iloc[:, :-1])
@@ -71,3 +72,5 @@ testtarget=np.array(atest["income"])
 # Show number of training and testing data points
 print("Train segment has size:", traindata.shape)
 print("Test segment has size:",testdata.shape)
+
+#TODO: more interesting graphs like race vs gender vs hours / week
