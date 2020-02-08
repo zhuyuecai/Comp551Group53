@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -10,12 +12,6 @@ def anyNull(data):
         counter= counter+data[col].isnull().sum()
     print("There are", counter, "null values.")
     return counter
-
-def NullDetailed(data):
-    print("Number of null values in each column: ")
-    for col in data.columns:
-        print(col, ":", data[col].isnull().sum())
-    return
 
   
 #import ionosphere data
@@ -35,21 +31,18 @@ print("Shape is: " ,idata.shape)
 print("First few rows:\n", idata.head(5), "\n Averages for the columns:")
 print(idata.describe(include='all'))
 
+#find correlations
 correlation = idata.corr()
 plt.figure(figsize=(12, 12))
 print("Also let's check the correlation, to see if there are any patterns to note")
-print("Correlation heatmapt might take a while")
-heatmap = sns.heatmap(correlation, linewidths=0.5, linecolor="white",vmin=-0.7, cmap="PuOr")
-
+#output correlation heatmap
+ax=heatmap = sns.heatmap(correlation, linewidths=0.5, linecolor="white",vmin=-0.7, cmap="PuOr")
+ax.set_ylim(32.0, 0)
+plt.show()
 #Check for nulls
-nullamount=anyNull(idata)
-if nullamount >0 : NullDetailed(idata) 
-            
-#row one contains only 0's, so we can remove the whole row
-print("\n Rows 1 contains only 0s, we can remove it \n")
-
-idata=idata.drop(columns=[1])
-
+anyNull(idata)
+         
+#into Numpy
 print("Finally, convert to a Numpy array")
 idata=idata.to_numpy()
 
@@ -61,3 +54,10 @@ target = idata[:, -1:]
 # Show number of training and testing data points
 print("Data segment has size:", data.shape)
 print("Target segment has size:",target.shape)
+
+#column one contains only 0's, so we can try and see what happens if we remove the whole column
+print("\n Column 1 contains only 0s, we can remove it \n")
+
+idataedited=idata.drop(columns=[1])
+datab = idataedited[:, :-1]
+targetb = idataedited[:, -1:]
