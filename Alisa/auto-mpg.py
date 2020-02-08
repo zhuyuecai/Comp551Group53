@@ -46,6 +46,8 @@ adata = pd.read_table(
         "origin",
         "car name",
     ],
+    # convert our target into binary form (23 being the mean)
+    converters={"mpg": lambda x: int(float(x) > 23.5)},
 )
 
 # convert variables from int to float and make them categorical
