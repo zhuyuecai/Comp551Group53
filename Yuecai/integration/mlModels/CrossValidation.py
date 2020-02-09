@@ -32,6 +32,7 @@ def evaluate_acc(true_y, target_y):
     N = FP + TN
     accuracy = (TP + TN) / (P + N)
     return accuracy
+
 class Cross_Validation:
 
     @staticmethod
@@ -56,3 +57,36 @@ class Cross_Validation:
             train_folds_score.append(evaluate_acc(training_labels, training_predicted))
             validation_folds_score.append(evaluate_acc(validation_labels, validation_predicted))
         return train_folds_score, validation_folds_score
+
+    @staticmethod
+    def Size_Experiment(learner, size, examples, labels, iter=10):
+        print("sample size %s"%(size))
+        train_folds_score = []
+        validation_folds_score = []
+        data = np.hstack((examples,labels))
+        counter = 0
+        while counter < iter:
+            try:
+                np.random.shuffle(data)
+                training_set = data[:size, :-1]
+                training_labels = data[:size, -1:][:,0]
+                validation_set = data[size:, :-1]
+                validation_labels = data[size:, -1:][:,0]
+                learner.fit(training_set, training_labels)
+                training_predicted = learner.predict(training_set)
+                validation_predicted = learner.predict(validation_set)
+                train_folds_score.append(evaluate_acc(training_labels, training_predicted))
+                validation_folds_score.append(evaluate_acc(validation_labels, validation_predicted))
+                counter +=1
+            except:
+                pass
+        return train_folds_score, validation_folds_score
+
+            
+
+
+
+
+
+
+

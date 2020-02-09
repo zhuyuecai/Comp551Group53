@@ -57,7 +57,6 @@ class GaussianNaiveBayes:
     def fit(self,X, y):
         self.this_class_prior, self.n_class, self.y_dict = self.class_prior(y)
         self.mean, self.variance, self.n_features = self.mean_variance(X, y)
-        print("fitted model with %s classes and %s features"%(self.n_class, self.n_features))
 
 
     def predict(self, x):
