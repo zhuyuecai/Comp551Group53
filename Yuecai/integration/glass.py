@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+from mlModels.naive_bayes import GaussianNaiveBayes
+from sklearn.metrics import average_precision_score, accuracy_score
 
 def anyNull(data):
     print("Number of null values in each column: ")
@@ -11,12 +12,15 @@ def anyNull(data):
     return
 
 #import data
-idata = pd.read_table("glass.data", sep=',', header=None, names=['id', 'RI', 'Na', 'Mg', 'Al', 'Si','K','Ca','Ba','Fe', 'glasstype'])
+idata = pd.read_table("data_sets/glass.data", sep=',', header=None, names=['id', 'RI', 'Na', 'Mg', 'Al', 'Si','K','Ca','Ba','Fe', 'glasstype'])
 
 #convert variables from int to float and make them categorical
-for col in set(idata.columns) - set(idata.describe().columns):
-    idata[col] = idata[col].astype('category')
-          
+#for col in set(idata.columns) - set(idata.describe().columns):
+    #idata[col] = idata[col].astype('category')
+idata = idata[idata.glasstype <3]
+idata["glasstype"] -= 1 
+
+print(idata["glasstype"].unique())         
 # Get basic statistics:
 print("Analyze the data first \n")
 print("Shape is: " ,idata.shape)
@@ -50,16 +54,34 @@ gridA = sns.JointGrid(x="Ba", y="Mg", data=g, size=6)
 gridA=gridA.plot(sns.regplot, sns.distplot)
 plt.show()
 
+# convert variables from int to float and make them categorical
+for col in set(idata.columns):
+    try:
+        idata[col] = idata[col].astype("float")
+    except: 
+        idata[col] = idata[col].astype("category").cat.codes
+
 print("Finally, convert to a Numpy arrays")
 train=idata.sample(frac = 0.8)
-traindata=np.array(train.iloc[:, :-1])
+traindata=np.array(train.iloc[:, 1:-1])
 traintarget=np.array(train["glasstype"])
 
 test= idata.drop(train.index)
-testdata=np.array(test.iloc[:, :-1])
+testdata=np.array(test.iloc[:, 1:-1])
 testtarget=np.array(test["glasstype"])
 # Show number of training and testing data points
 print("Train segment has size:", traindata.shape)
 print("Test segment has size:", testdata.shape)
 
 #possible feature subsets: add ri calcium, get rid off K, Fe, Na?
+
+# naive_experiment for accuracy 
+naive_bayes = GaussianNaiveBayes()
+naive_bayes.fit(traindata, traintarget)
+pre, score = naive_bayes.predict(testdata)
+average_precision = average_precision_score(testtarget, score[:,1])
+accuracy = accuracy_score(testtarget, pre)
+print('Average precision-recall score: {0:0.2f}'.format(
+              average_precision))
+print('accuracy score: {0:0.2f}'.format(
+              accuracy))

@@ -3,6 +3,9 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from mlModels.naive_bayes import GaussianNaiveBayes
+#from mlModels.LogisticRegression import LogisticRegression
+from mlModels.NewLogistic import LogisticRegression
+from mlModels.CrossValidation import Cross_Validation
 from sklearn.metrics import average_precision_score, accuracy_score
 
 def anyNull(data):
@@ -53,15 +56,16 @@ print("Train segment target has size:", traintarget.shape)
 print("Test segment target has size:", testtarget.shape)
 # possible feature sets for later: force (weight * acceleration), weight horsepower?
 
-
-
 # naive_experiment for accuracy 
 naive_bayes = GaussianNaiveBayes()
-naive_bayes.fit(traindata, traintarget)
-pre, score = naive_bayes.predict(testdata)
-average_precision = average_precision_score(testtarget, score[:,1])
-print('Average precision-recall score: {0:0.2f}'.format(
-              average_precision))
-accuracy = accuracy_score(testtarget, pre)
-print('accuracy score: {0:0.2f}'.format(
-              accuracy))
+train_score, test_score = Cross_Validation.Cross_Validation(naive_bayes, 5, np.array(adata.iloc[:, 1:]),
+                                                           np.array(adata["mpg"]))
+print('naive_bayes accuracy score: {0:0.2f}'.format(
+              np.mean(test_score)))
+
+# naive_experiment for accuracy 
+logres = LogisticRegression()
+train_score, test_score = Cross_Validation.Cross_Validation(logres, 5, np.array(adata.iloc[:, 1:]),
+                                                           np.array(adata["mpg"]))
+print('logistic regression accuracy score: {0:0.2f}'.format(
+              np.mean(test_score)))

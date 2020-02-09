@@ -32,11 +32,11 @@ class GaussianNaiveBayes:
         xs = []
         for c in range(self.n_class):
             xs.append( np.array([X[i] for i in range(X.shape[0]) if y[i] == c]))
-        xs = np.array(xs)
+        #xs = np.array(xs)
         for c in range(self.n_class):
             for j in range(n_features):
                 m[c][j] = np.mean(xs[c].T[j])
-                v[c][j] = np.var(xs[c].T[j])*(self.y_dict[c]/(self.y_dict[0] - 1))
+                v[c][j] = np.var(xs[c].T[j], ddof=1)
                 if v[c][j] == 0: print((c,j))
         return m, v, n_features # mean and variance 
 
@@ -46,7 +46,6 @@ class GaussianNaiveBayes:
         m = self.mean
         v = self.variance
         n_sample = x.shape[0]
-        print(x.shape)
         pfc = np.ones(( n_sample, self.n_class))
         for s in range(n_sample):
             for i in range(self.n_class):
@@ -57,7 +56,6 @@ class GaussianNaiveBayes:
 
     def fit(self,X, y):
         self.this_class_prior, self.n_class, self.y_dict = self.class_prior(y)
-        print("fitted model with %s classes and %s features"%(self.n_class, self.n_features))
         self.mean, self.variance, self.n_features = self.mean_variance(X, y)
         print("fitted model with %s classes and %s features"%(self.n_class, self.n_features))
 
@@ -73,7 +71,7 @@ class GaussianNaiveBayes:
             for i in range(self.n_class):
                 pcf[s][i] = (pfc[s][i] * self.this_class_prior[i])/total_prob
         prediction = [int(pcf[s].argmax()) for s in range(n_sample)]
-        return prediction, pcf
+        return prediction
 
 
 
