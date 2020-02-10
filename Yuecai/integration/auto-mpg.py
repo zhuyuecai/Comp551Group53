@@ -6,7 +6,6 @@ from mlModels.naive_bayes import GaussianNaiveBayes
 #from mlModels.LogisticRegression import LogisticRegression
 from mlModels.NewLogistic import LogisticRegression
 from mlModels.CrossValidation import Cross_Validation
-from sklearn.metrics import average_precision_score, accuracy_score
 
 def anyNull(data):
     print("Number of null values in each column: ")
@@ -45,27 +44,44 @@ for col in set(adata.columns):
 
 # naive_experiment for accuracy 
 naive_bayes = GaussianNaiveBayes()
-#train_score, test_score = Cross_Validation.Cross_Validation(naive_bayes, 5, np.array(adata.iloc[:, 1:]),
-#                                                           np.array(adata["mpg"]))
-#print('naive_bayes accuracy score: {0:0.2f}'.format(np.mean(test_score)))
+train_score, test_score = Cross_Validation.Cross_Validation(naive_bayes, 5, np.array(adata.iloc[:, 1:]),
+                                                           np.array(adata["mpg"]))
+print('naive_bayes accuracy score: {0:0.2f}'.format(np.mean(test_score)))
 
 # naive_experiment for accuracy 
 logres = LogisticRegression()
-#train_score, test_score = Cross_Validation.Cross_Validation(logres, 5, np.array(adata.iloc[:, 1:]),
- #                                                          np.array(adata["mpg"]))
-#print('logistic regression accuracy score: {0:0.2f}'.format(np.mean(test_score)))
+train_score, test_score = Cross_Validation.Cross_Validation(logres, 5, np.array(adata.iloc[:, 1:]),
+                                                           np.array(adata["mpg"]))
+print('logistic regression accuracy score: {0:0.2f}'.format(np.mean(test_score)))
 
 
 #change number of folds to control the training sample size
-for k in range(20, 200, 10):
+naive_test_score = []
+logi_test_score = []
+sample_size = list(range(2,100,2))
+for k in sample_size:
     train_score, test_score = Cross_Validation.Size_Experiment(naive_bayes, k, np.array(adata.iloc[:, 1:]),
                                                                np.array(adata.iloc[: ,:1]))
     print('naive_bayes accuracy score: {0:0.2f}'.format(
                   np.mean(test_score)))
+    naive_test_score.append(np.mean(test_score))
     train_score, test_score = Cross_Validation.Size_Experiment(logres, k, np.array(adata.iloc[:, 1:]),
                                                                np.array(adata.iloc[: ,:1]))
     print('logistic regression accuracy score: {0:0.2f}'.format(
                   np.mean(test_score)))
+    logi_test_score.append(np.mean(test_score))
+
+dd =pd.DataFrame(list(zip(sample_size, naive_test_score,logi_test_score)),
+                 columns=["sample_size","NB","Logit"])
+                
+
+plt.figure(figsize=(10, 5))
+plt.subplot(1,2,1)
+sns.lineplot(x="sample_size",y="NB", data=dd)
+plt.subplot(1,2,2)
+sns.lineplot(x="sample_size",y="Logit", data=dd)
+plt.savefig("auto_mpg_samplesize.png")
+
 
 
 
