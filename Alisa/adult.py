@@ -130,10 +130,11 @@ plt.show()
 
 #check gender race income bias
 print("Are there any gender / race related biases? \n")
-plt.figure(figsize=(12, 12))
-ax = sns.catplot(x="race", y="hours-per-week", hue="gender", data=adata, col="income",
-                 kind="bar")
+plt.figure(figsize=(14, 12))
+ax = sns.catplot(x="race",  hue="gender", data=adatauncategorical, col="income",
+                 kind="count")              
 plt.show()
+
 
 #------------------------------
 #FEATURE SUBSET
