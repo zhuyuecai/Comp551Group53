@@ -10,28 +10,29 @@ def anyNull(data):
         print(col, ":", data[col].isnull().sum())
     return
 
-
 def printGraphs(adata):
     plt.figure(figsize=(10, 10))
-    plt.axis("equal")
+    plt.axis('equal')
     plt.subplot(2, 3, 1)
-    sns.distplot(adata["age"])
+    sns.distplot(adata['age'])
     plt.subplot(2, 3, 2)
-    sns.distplot(adata["fnlwgt"])
+    sns.distplot(adata['fnlwgt'])
     plt.subplot(2, 3, 3)
-    sns.distplot(adata["educational-num"])
+    sns.distplot(adata['educational-num'])
     plt.subplot(2, 3, 4)
-    sns.distplot(adata["capital-gain"])
+    sns.distplot(adata['capital-gain'])
     plt.subplot(2, 3, 5)
-    sns.distplot(adata["capital-loss"])
+    sns.distplot(adata['capital-loss'])
     plt.subplot(2, 3, 6)
-    sns.distplot(adata["hours-per-week"])
+    sns.distplot(adata['hours-per-week'])
+#------------------------------
+#IMPORT adult data & adult test
+#------------------------------
+target_col = "income"
 
-
-# import adult data & adult test
 adata = pd.read_table(
     "adult.data",
-    sep=",",
+    sep=",\s",
     header=None,
     names=[
         "age",
@@ -72,56 +73,119 @@ atest = pd.read_csv(
         "native-country",
         "income",
     ],
-    engine="python",
+    engine="python"
 )
+
+
+# for some reason test file ended with a '.' for income
+atest["income"].replace(regex=True, inplace=True, to_replace=r"\.", value=r"")
+
+adata = pd.concat([adata,atest])
+#drop it since 0 variance, this feature is a strong signal, can be used rule based to assemble the result
+adata["income"].replace(regex=True, inplace=True, to_replace=r" ", value=r"")
+adata[target_col].replace(' ', '', inplace=True)
+adatauncategorical=adata
+#------------------------------            
+# Get basic statistics:
+#------------------------------
+print("Analyze the data first \n")
+print("Shape is: " ,adata.shape)
+print("First few rows:\n", adata.head(5), "\n Averages for the columns:")
+print(adata.describe())
+#------------------------------
+# deal with nulls & other formatting issues
+#------------------------------
+adata=adata.replace(" ?",np.NaN)
+anyNull(adata)
+print("Get rid off all null rows\n")
+adata= adata.dropna(how='any',axis=0) 
+print("New shape is: " ,adata.shape)
 
 
 # convert variables from int to float and make them categorical
-for col in set(adata.columns) - set(adata.describe().columns):
-    adata[col] = adata[col].astype("category")
-for col in set(atest.columns) - set(atest.describe().columns):
-    atest[col] = atest[col].astype("category")
-atest["income"].replace(regex=True, inplace=True, to_replace=r"\.", value=r"")
-# for some reason test file ended with a '.' for income
+for col in set(adata.columns):
+    try:
+        adata[col] = adata[col].astype("float")
+    except: 
+        adata[col] = adata[col].astype("category").cat.codes
+        
+#shuffle data
+adata = adata.sample(frac=1).reset_index(drop=True)
 
-# Get basic statistics:
-print("Analyze the data first \n")
-print("Shape is: ", adata.shape)
-print("First few rows:\n", adata.head(5), "\n Averages for the columns:")
-print(adata.describe())
-print(
-    "Looks like we have people working 99 hours a week, which is illegal but possible if one works 14 hours every day of the week"
-)
-
-adata = adata.replace(" ?", np.NaN)
-atest = atest.replace(" ?", np.NaN)
-anyNull(adata)
-print("Get rid off all null rows\n")
-adata = adata.dropna(how="any", axis=0)
-atest = atest.dropna(how="any", axis=0)
-print("New shape is: ", adata.shape)
-
+#------------------------------
+#FEATURE ANALYSIS
+#------------------------------
 correlation = adata.corr()
 plt.figure(figsize=(12, 12))
 print("Also let's check the correlation, to see if there are any patterns to note")
-ax = sns.heatmap(
-    correlation, annot=True, linewidths=0.5, linecolor="white", vmin=-0.7, cmap="PuOr"
-)
-ax.set_ylim(6.0, 0)
+ax=sns.heatmap(correlation,annot=True, linewidths=0.5, linecolor="white",vmin=-0.7, cmap="PuOr")
+
+ax.set_ylim(15, 0) #for heatmap 
 plt.show()
-print(
-    "There aren't any useful correlations\n Let's check for any outliers in each column \n"
-)
-printGraphs(adata)
+print("There aren't many any big correlations")
+print("Instead let's check the numerical columns \n")
+
+printGraphs(adata) #columns one by one
+plt.show() 
+
+#check gender race income bias
+print("Are there any gender / race related biases? \n")
+plt.figure(figsize=(12, 12))
+ax = sns.catplot(x="race", y="hours-per-week", hue="gender", data=adata, col="income",
+                 kind="bar")
 plt.show()
 
+#------------------------------
+#FEATURE SUBSET
+#------------------------------
+print("Let's check if we can get rid off any features (feature subset) \n")
+
+plt.figure(figsize=(12, 6))
+ax= sns.barplot(data=adatauncategorical, x="education", y="educational-num", )
+plt.show()
+print("Educational-num and education mean more or less the same thing, so drop education")
+adataimproved= adata.drop(columns="education")
+
+#native country
+plt.figure(figsize=(12, 6))
+sns.countplot(y='native-country', hue='income', data=adatauncategorical)
+plt.show()
+print("Drop native country as well, as most there are", adataimproved["native-country"].nunique(), "countries, but most entries are from US")
+adataimproved= adata.drop(columns="native-country")
+
+#fnlgtw
+print("The final weight determined by the Census Organization is of no use in any of the analysis that we are doing henceforth and is removed \n")
+adataimproved= adata.drop(columns="fnlwgt")
+
+
+#for capital loss & gain we have way too many zero's
+#capital gain
+#adataimproved["capital-gain"]= np.log(adataimproved["capital-gain"]+1) 
+#sns.distplot(adataimproved["capital-gain"])
+#plt.show()
+
+
+#------------------------------
+#NUMPY CONVERSIONS
+#------------------------------
 print("Finally, convert to a Numpy arrays")
-traindata = np.array(adata.iloc[:, :-1])
-traintarget = np.array(adata["income"])
-testdata = np.array(atest.iloc[:, :-1])
-testtarget = np.array(atest["income"])
+train=adata.sample(frac = 0.8)
+traindata=np.array(train.iloc[:, :-1])
+traintarget=np.array(train["income"])
+
+test= adata.drop(train.index)
+testdata=np.array(test.iloc[:, :-1])
+testtarget=np.array(test["income"])
+
+
 # Show number of training and testing data points
 print("Train segment has size:", traindata.shape)
-print("Test segment has size:", testdata.shape)
+print("Test segment has size:",testdata.shape)
 
-# TODO: more interesting graphs like race vs gender vs hours / week
+trainimpr=adataimproved.sample(frac = 0.8)
+traindataimpr=np.array(train.iloc[:, :-1])
+traintargetimpr=np.array(train["income"])
+
+testimpr= adataimproved.drop(train.index)
+testdataimpr=np.array(test.iloc[:, :-1])
+testtargetimpr=np.array(test["income"])
