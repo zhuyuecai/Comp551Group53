@@ -37,7 +37,6 @@ class GaussianNaiveBayes:
             for j in range(n_features):
                 m[c][j] = np.mean(xs[c].T[j])
                 v[c][j] = np.var(xs[c].T[j], ddof=1)
-                if v[c][j] == 0: print((c,j))
         return m, v, n_features # mean and variance 
 
 

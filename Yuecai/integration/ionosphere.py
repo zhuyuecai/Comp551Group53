@@ -5,6 +5,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from mlModels.naive_bayes import GaussianNaiveBayes
+from mlModels.NewLogistic import LogisticRegression
+from mlModels.CrossValidation import Cross_Validation
 from sklearn.metrics import average_precision_score, accuracy_score
 
 
@@ -74,12 +76,44 @@ print("Test segment target has size:", testtarget.shape)
 
 # naive_experiment for accuracy 
 naive_bayes = GaussianNaiveBayes()
-naive_bayes.fit(traindata, traintarget)
-pre, score = naive_bayes.predict(testdata)
-average_precision = average_precision_score(testtarget, score[:,1])
-accuracy = accuracy_score(testtarget, pre)
-print('Average precision-recall score: {0:0.2f}'.format(
-              average_precision))
-print('accuracy score: {0:0.2f}'.format(
-              accuracy))
+train_score, test_score = Cross_Validation.Cross_Validation(naive_bayes, 5, np.array(adata.iloc[:, 2:-1]),
+                                                           np.array(adata[34]))
+print('naive_bayes accuracy score: {0:0.2f}'.format(np.mean(test_score)))
+logres = LogisticRegression()
+train_score, test_score = Cross_Validation.Cross_Validation(logres, 5, np.array(adata.iloc[:, 2:-1]),
+                                                           np.array(adata[34]))
+print('logistic regression accuracy score: {0:0.2f}'.format(np.mean(test_score)))
+
+#change number of folds to control the training sample size
+naive_test_score = []
+logi_test_score = []
+sample_size = list(range(2,100,2))
+for k in sample_size:
+    train_score, test_score = Cross_Validation.Size_Experiment(naive_bayes, k, np.array(adata.iloc[:, 2:-1]),
+                                                               np.array(adata.iloc[: ,34:]))
+    print('naive_bayes accuracy score: {0:0.2f}'.format(
+                  np.mean(test_score)))
+    naive_test_score.append(np.mean(test_score))
+    train_score, test_score = Cross_Validation.Size_Experiment(logres, k, np.array(adata.iloc[:, 2:-1]),
+                                                               np.array(adata.iloc[: ,34:]))
+    print('logistic regression accuracy score: {0:0.2f}'.format(
+                  np.mean(test_score)))
+    logi_test_score.append(np.mean(test_score))
+
+dd =pd.DataFrame(list(zip(sample_size, naive_test_score,logi_test_score)),
+                 columns=["sample_size","NB","Logit"])
+                
+
+plt.figure(figsize=(10, 5))
+plt.subplot(1,2,1)
+sns.lineplot(x="sample_size",y="NB", data=dd)
+plt.subplot(1,2,2)
+sns.lineplot(x="sample_size",y="Logit", data=dd)
+plt.savefig("iono_samplesize.png")
+
+
+
+
+
+
 

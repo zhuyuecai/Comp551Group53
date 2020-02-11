@@ -108,7 +108,7 @@ print('logistic regression accuracy score: {0:0.2f}'.format(np.mean(test_score))
 
 naive_test_score = []
 logi_test_score = []
-sample_size = list(range(100,2000,100))
+sample_size = list(range(2,100,2))
 #change number of folds to control the training sample size
 for k in sample_size:
     train_score, test_score = Cross_Validation.Size_Experiment(naive_bayes, k, np.array(adata.iloc[:, :-1]),
@@ -120,7 +120,7 @@ for k in sample_size:
 
 dd =pd.DataFrame(list(zip(sample_size, naive_test_score,logi_test_score)),
                  columns=["sample_size","NB","Logit"])
-plt.figure(figsize=(10, 20))
+plt.figure(figsize=(10, 5))
 plt.subplot(1,2,1)
 sns.lineplot(x="sample_size",y="NB", data=dd)
 plt.subplot(1,2,2)

@@ -59,7 +59,7 @@ class Cross_Validation:
         return train_folds_score, validation_folds_score
 
     @staticmethod
-    def Size_Experiment(learner, size, examples, labels, iter=10):
+    def Size_Experiment(learner, size, examples, labels, iter=20):
         print("sample size %s"%(size))
         train_folds_score = []
         validation_folds_score = []
