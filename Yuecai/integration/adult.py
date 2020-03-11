@@ -16,6 +16,34 @@ def anyNull(data):
     return
 
 
+def printGraphs(adata, data_name):
+    plt.figure(figsize=(10, 10))
+    plt.axis("equal")
+    plt.subplot(2, 3, 1)
+    sns.distplot(adata["age"])
+    plt.subplot(2, 3, 2)
+    sns.distplot(adata["fnlwgt"])
+    plt.subplot(2, 3, 3)
+    sns.distplot(adata["educational-num"])
+    plt.subplot(2, 3, 4)
+    sns.distplot(adata["capital-gain"])
+    plt.subplot(2, 3, 5)
+    sns.distplot(adata["capital-loss"])
+    plt.subplot(2, 3, 6)
+    sns.distplot(adata["hours-per-week"])
+    plt.savefig(data_name)
+    plt.close()
+
+def getHeatMap(adata, data_name):
+    correlation = adata.corr()
+    plt.figure(figsize=(12, 12))
+    ax = sns.heatmap(
+        correlation, annot=True, linewidths=0.5, linecolor="white", vmin=-0.7, cmap="PuOr"
+    )
+    ax.set_ylim(8.0, 0)
+    plt.savefig("%s_heatmap.png"%(data_name))
+    plt.close()
+
 # import adult data & adult test
 adata = pd.read_table(
     "data_sets/adult.data",
@@ -93,6 +121,9 @@ for col in set(adata.columns):
     except: 
         adata[col] = adata[col].astype("category").cat.codes
 
+printGraphs(adata, "adult_dis")
+getHeatMap(adata,  "adult_dis")
+
 # naive_experiment for accuracy 
 naive_bayes = GaussianNaiveBayes()
 train_score, test_score = Cross_Validation.Cross_Validation(naive_bayes, 5, np.array(adata.iloc[:, :-1]),
@@ -126,7 +157,6 @@ sns.lineplot(x="sample_size",y="NB", data=dd)
 plt.subplot(1,2,2)
 sns.lineplot(x="sample_size",y="Logit", data=dd)
 plt.savefig("adult_samplesize.png")
-
 
 
 

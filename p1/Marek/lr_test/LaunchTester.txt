@@ -1,0 +1,50 @@
+------------------------------
+Add to bottom of ionosphere.py
+------------------------------
+
+import LogRegTester as lrt
+
+data = np.array(adata.iloc[:, 2:-1])
+target = np.array(adata[34])
+
+tester = lrt.LogRegTester(data, target, 5)
+tester.iterativeTester()
+
+-------------------------
+Add to bottom of glass.py
+-------------------------
+
+import LogRegTester as lrt
+
+tester = lrt.LogRegTester(train, traintarget, 5)
+tester.iterativeTester()
+
+-------------------------
+Add to bottom of adult.py
+-------------------------
+
+import LogRegTester as lrt
+
+train = adata.sample(frac=1)
+
+data = np.array(train.iloc[:, :-1])
+target = np.array(train[target_col])
+
+tester = lrt.LogRegTester(data, target, 5)
+tester.iterativeTester()
+
+
+------------------------
+Add to bottom of auto-mg
+------------------------
+
+import LogRegTester as lrt
+
+data = np.array(adata.iloc[:, 1:])
+target = np.array(adata["mpg"])
+
+tester = lrt.LogRegTester(data, target, 5)
+tester.iterativeTester()
+
+
+

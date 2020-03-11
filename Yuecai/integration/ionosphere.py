@@ -35,14 +35,6 @@ print("Shape is: " ,idata.shape)
 print("First few rows:\n", idata.head(5), "\n Averages for the columns:")
 print(idata.describe(include='all'))
 
-#find correlations
-correlation = idata.corr()
-plt.figure(figsize=(12, 12))
-print("Also let's check the correlation, to see if there are any patterns to note")
-#output correlation heatmap
-ax=heatmap = sns.heatmap(correlation, linewidths=0.5, linecolor="white",vmin=-0.7, cmap="PuOr")
-ax.set_ylim(32.0, 0)
-plt.show()
 #Check for nulls
 anyNull(idata)
          
@@ -60,20 +52,17 @@ for col in set(idata.columns):
 
 print("Finally, convert to a Numpy array")
 adata=idata
-print("\n First two columns contains only same value, we can remove it \n")
-train = adata.sample(frac=0.8)
-traindata = np.array(train.iloc[:, 2:-1])
-traintarget = np.array(train[34])
 
-test = adata.drop(train.index)
-testdata = np.array(test.iloc[:, 2:-1])
-testtarget = np.array(test[34])
-# Show number of training and testing data points
-print("Train segment has size:", traindata.shape)
-print("Test segment has size:", testdata.shape)
-print("Train segment target has size:", traintarget.shape)
-print("Test segment target has size:", testtarget.shape)
-
+#find correlations
+correlation = idata.corr()
+plt.figure(figsize=(12, 12))
+print("Also let's check the correlation, to see if there are any patterns to note")
+#output correlation heatmap
+ax=heatmap = sns.heatmap(correlation, linewidths=0.5, linecolor="white",vmin=-0.7, cmap="PuOr")
+ax.set_ylim(34.0, 0)
+ax.set_xlim(34.0, 0)
+plt.savefig("iono_heat.png")
+plt.close()
 # naive_experiment for accuracy 
 naive_bayes = GaussianNaiveBayes()
 train_score, test_score = Cross_Validation.Cross_Validation(naive_bayes, 5, np.array(adata.iloc[:, 2:-1]),
@@ -110,6 +99,21 @@ sns.lineplot(x="sample_size",y="NB", data=dd)
 plt.subplot(1,2,2)
 sns.lineplot(x="sample_size",y="Logit", data=dd)
 plt.savefig("iono_samplesize.png")
+
+train_X = np.array(adata.iloc[:, 2:-1])
+train_y = np.array(adata.iloc[: ,34])
+plt.figure(figsize=(10, 20))
+for lr in range(0, 5):
+    lrt = 0.01 + lr*0.04,
+    logres_lr = LogisticRegression(lr=lrt, num_iter=2000)
+    result = logres_lr.fit_lr_test(train_X, train_y, eps=0.000001)
+    plt.subplot(3,2,lr+1)
+    plt.plot(result[0], result[1], label=str(lrt))
+    plt.title("lrate %s"%(lrt))
+plt.savefig("iono_lr.png")
+plt.close()
+
+
 
 
 

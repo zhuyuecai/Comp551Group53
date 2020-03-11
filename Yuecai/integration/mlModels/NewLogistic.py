@@ -1,5 +1,6 @@
 import numpy as np
 from math import *
+from mlModels.CrossValidation import evaluate_acc
 
 class LogisticRegression:
     def __init__(self, lr=0.01, num_iter=100000, verbose=False):
@@ -17,12 +18,29 @@ class LogisticRegression:
         return (-y * np.log(h) - (1 - y) * np.log(1 - h)).mean()
     
 
-    def fit(self, X, y, eps=0.01):
-        X = self.add_inter(X)
-        
+    def fit(self, X_t, y, eps=0.01):
+        X = self.add_inter(X_t)
         # weights initialization
         self.weight = np.zeros(X.shape[1])
-        
+        for i in range(self.num_iter):
+            z = np.dot(X, self.weight)
+            h = self.__sigmoid(z)
+            gradient = np.dot(X.T, (h - y)) / y.size
+            self.weight -= self.lr * gradient
+    
+    def predict_prob(self, X_t):
+        X = self.add_inter(X_t)
+        return self.__sigmoid(np.dot(X, self.weight))
+    
+    def predict(self, X, threshold=0.5):
+        return self.predict_prob(X) >= threshold
+    
+    def fit_lr_test(self, X_t, y, eps=0.01):
+        X = self.add_inter(X_t)
+        result = [[],[]]
+        # weights initialization
+        self.weight = np.zeros(X.shape[1])
+        previous_loss = 0
         for i in range(self.num_iter):
             z = np.dot(X, self.weight)
             h = self.__sigmoid(z)
@@ -30,13 +48,13 @@ class LogisticRegression:
             self.weight -= self.lr * gradient
             z = np.dot(X, self.weight)
             h = self.__sigmoid(z)
-            if self.__loss(h,y) < eps: 
-                print("num of iteration %s"%(i))
+            current_loss = self.__loss(h,y)
+            if previous_loss > 0 and abs(current_loss-previous_loss) < eps: 
                 break
-    
-    def predict_prob(self, X):
-        X = self.add_inter(X)
-        return self.__sigmoid(np.dot(X, self.weight))
-    
-    def predict(self, X, threshold=0.5):
-        return self.predict_prob(X) >= threshold
+            previous_loss = current_loss
+            if i % 5 == 0:
+                result[0].append(i)
+                result[1].append(evaluate_acc(y,self.predict(X_t)))
+        return result
+
+

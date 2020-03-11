@@ -41,7 +41,8 @@ print("Also let's check the correlation, to see if there are any patterns to not
 
 ax=sns.heatmap(correlation,annot=True, linewidths=0.5, linecolor="white",vmin=-0.7, cmap="PuOr")
 ax.set_ylim(10.0, 0)
-plt.show()
+plt.savefig("glass_heat.png")
+plt.close()
 print("There is a positive correlation between Refractive Index and Calcium, negative one with Silicon")
 print("Magnesium has a negative correlation with Calcium, Aluminum, and Barium")
 print("Aluminum has a slight positive correlation with Barium\n")
@@ -49,11 +50,13 @@ print("Aluminum has a slight positive correlation with Barium\n")
 g = idata[['RI', 'Ca']]
 gridA = sns.JointGrid(x="Ca", y="RI", data=g, size=6)
 gridA=gridA.plot(sns.regplot, sns.distplot)
-plt.show()
-g = idata[['Mg', 'Ba']]
-gridA = sns.JointGrid(x="Ba", y="Mg", data=g, size=6)
+plt.savefig("glass_RI_Ca.png")
+plt.close()
+g = idata[['Mg', 'Ca']]
+gridA = sns.JointGrid(x="Ca", y="Mg", data=g, size=6)
 gridA=gridA.plot(sns.regplot, sns.distplot)
-plt.show()
+plt.savefig("glass_Mg_Ca.png")
+plt.close()
 
 # convert variables from int to float and make them categorical
 for col in set(idata.columns):
@@ -62,7 +65,10 @@ for col in set(idata.columns):
     except: 
         idata[col] = idata[col].astype("category").cat.codes
 
-adata = idata
+print(idata.columns)
+#drop ca column
+adata = idata.drop(columns = 'RI')
+#adata = idata
 #possible feature subsets: add ri calcium, get rid off K, Fe, Na?
 # naive_experiment for accuracy 
 naive_bayes = GaussianNaiveBayes()
@@ -102,4 +108,17 @@ sns.lineplot(x="sample_size",y="NB", data=dd)
 plt.subplot(1,2,2)
 sns.lineplot(x="sample_size",y="Logit", data=dd)
 plt.savefig("glass_samplesize.png")
+
+train_X = np.array(adata.iloc[:, 1:-1])
+train_y = np.array(adata.iloc[: ,-1])
+plt.figure(figsize=(10, 20))
+for lr in range(0, 5):
+    lrt = 0.01 + lr*0.04,
+    logres_lr = LogisticRegression(lr=lrt, num_iter=4000)
+    result = logres_lr.fit_lr_test(train_X, train_y, eps=0.000001)
+    plt.subplot(3,2,lr+1)
+    plt.plot(result[0], result[1], label=str(lrt))
+    plt.title("lrate %s"%(lrt))
+plt.savefig("glass_lr.png")
+
 
