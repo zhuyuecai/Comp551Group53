@@ -1,0 +1,114 @@
+\documentclass[11pt,letterpaper]{article}
+%\documentclass[11pt,letterpaper]{exam}
+\usepackage[latin1]{inputenc}
+\usepackage[left=3.00cm, right=3.00cm, top=3.00cm, bottom=3.00cm]{geometry}
+
+%\renewcommand{\thesubsection}{\thesection.(\alph{subsection})}
+%\renewcommand{\thesubsubsection}{\thesubsection.\roman{subsubsection}}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+%\usepackage{amsthm}
+%\usepackage{cancel}
+\usepackage{mathtools}
+%\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+%\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+\usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
+%\usepackage{xcolor}
+%\usepackage{graphicx}
+\usepackage{caption}
+%\definecolor{acolour}{rgb}{0,0.0,0}
+
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
+%\usepackage{url}
+\usepackage{listings}
+%\usepackage[]{algorithm2e}
+
+\lstset{
+    language=Python,
+    basicstyle=\ttm,
+    otherkeywords={self},             % Add keywords here
+    keywordstyle=\ttb\color{deepblue},
+    emph={MyClass,__init__},          % Custom highlighting
+    emphstyle=\ttb\color{deepred},    % Custom highlighting style
+    stringstyle=\color{deepgreen},
+    frame=tb,                         % Any extra options here
+    showstringspaces=false            % 
+}
+
+\newcounter{nalg}[section] % defines algorithm counter for chapter-level
+\renewcommand{\thenalg}{\thechapter .\arabic{nalg}} %defines appearance of the algorithm counter
+\DeclareCaptionLabelFormat{algocaption}{Algorithm \thenalg} % defines a new caption label as Algorithm x.y
+
+\lstnewenvironment{algorithm}[1][] %defines the algorithm listing environment
+{   
+	\refstepcounter{nalg} %increments algorithm number
+	\captionsetup{labelformat=algocaption,labelsep=colon} %defines the caption setup for: it uses label format as the declared caption label above and makes label and caption text to be separated by a ':'
+	\lstset{ %this is the stype
+		mathescape=true,
+		frame=tB,
+		numbers=left, 
+		numberstyle=\tiny,
+		basicstyle=\scriptsize, 
+		keywordstyle=\color{blue}\bfseries\em,
+		keywords={,input, output, return, datatype, function, in, if, else, foreach, while, begin, end, true, false, int, for, then, } %add the keywords you want, or load a language as Rubens explains in his comment above.
+		numbers=left,
+		xleftmargin=.02\textwidth,
+		#1 % this is to add specific settings to an usage of this environment (for instnce, the caption and referable label)
+	}
+}
+{}
+
+\usepackage{tikz}
+
+\usepackage{cancel}
+
+\newcommand{\bbm}{\begin{pmatrix*}[r]}
+\newcommand{\ebm}{\end{pmatrix*}}
+\newcommand{\ph}{\phantom{-}}
+
+\author{Yuecai Zhu\\#########\\Sahibzada Masood\\#########\\Simon Zheng\\260744353}
+\title{Project 2}
+\date{March 12$^{\textnormal{th}}$, 2020}
+\lhead{COMP 551}
+%\chead{Homework $$}
+\rhead{Applied Machine Learning}
+
+\begin{document}
+	\maketitle
+	\thispagestyle{fancy}
+	
+	\section{Abstract}
+	
+	
+	\section{Introduction}
+
+
+	\section{Related work}
+	
+	
+	\section{Dataset and Setup}
+
+
+	\section{Proposed Approach}
+	
+	
+	\section{Results}
+	
+	
+	\section{Discussion and Conclusion}
+	
+	
+	\section{Statement of Contributions}
+	
+	
+	\section{References and Bibliography}
+	
+
+\end{document}
