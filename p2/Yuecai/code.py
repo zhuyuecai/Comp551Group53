@@ -22,6 +22,14 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import SGDClassifier
 from sklearn import metrics
 
+def make_pipeline(estimator):
+    text_clf = Pipeline([
+        ('vect', CountVectorizer()),
+        ('tfidf', TfidfTransformer()),
+        ('clf', estimator)
+    ])
+    return text_clf
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 X_train, y_train = fetch_20newsgroups(
     subset="train", remove=("headers", "footers", "quotes"), return_X_y=True
