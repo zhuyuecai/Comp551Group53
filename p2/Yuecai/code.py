@@ -1,7 +1,7 @@
 from pprint import pprint
 from time import time
 import logging
-
+import csv
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -16,7 +16,7 @@ import numpy as np
 from sklearn.metrics import f1_score
 
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logging.basicConfig(filename='app.log', level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 X_train, y_train = fetch_20newsgroups(
     subset="train", remove=("headers", "footers", "quotes"), return_X_y=True
 )
@@ -26,30 +26,30 @@ X_test, y_test = fetch_20newsgroups(
     subset="test", remove=("headers", "footers", "quotes"), return_X_y=True
 )
 X_train = vectorizer.fit_transform(X_train)
-X_test = vectorizer.transform(data_test[0])
+X_test = vectorizer.transform(X_test)
 print(X_train.shape)
 print(X_test.shape)
 
-y_train = data[1]
-ch2 = SelectKBest(chi2, k=1000)
+ch2 = SelectKBest(chi2, k=5000)
 X_train = ch2.fit_transform(X_train, y_train)
 X_test = ch2.transform(X_test)
 
 models = {"RF": 0, "AdaBoost": 1, "linearSVM": 2}
+#models = {"linearSVM": 2}
 estimators = [
     RandomForestClassifier(),
     AdaBoostClassifier(),
-    LinearSVC(penalty=penalty, dual=False, tol=1e-3),
+    LinearSVC(),
 ]
 
 # Number of trees in random forest
-n_estimators = [int(x) for x in np.linspace(start=100, stop=2000, num=10)]
+n_estimators = [20,30,40,60,80,100,120,140,180,200]
 
 # Create the random grid
 rf_grid = {
     "n_estimators": n_estimators,
     "max_features": ["auto", "sqrt"],
-    "max_depth": [int(x) for x in np.linspace(20, 200, num=10)],
+    "max_depth": [1, 5, 10, 20, 40, 60, 80, 100, 120, 150, 200],
     "min_samples_split": [2, 5, 10],
     "min_samples_leaf": [1, 2, 4],
     "bootstrap": [True, False],
@@ -71,31 +71,43 @@ svc_grid = {
 grids = [rf_grid, ada_grid, svc_grid]
 
 
-def parameterTuning(clf, random_grid):
+def parameterTuning(clf, random_grid, x, y):
+    csvs = []
     tuning_guy = GridSearchCV(
         estimator=clf,
-        param_distributions=random_grid,
+        param_grid=random_grid,
         pre_dispatch=4,
+        scoring="f1_weighted",
         return_train_score=True,
-        cv=2,
+        cv=4,
         verbose=2,
-        random_state=42,
         n_jobs=-1,
     )
+    tuning_guy.fit(x, y)
+    for i in range(len(tuning_guy.cv_results_["mean_test_score"])):
+        csvs.append( [
+            tuning_guy.cv_results_["mean_test_score"][i],
+            tuning_guy.cv_results_["mean_fit_time"][i],
+        ] + [tuning_guy.cv_results_["params"][i][pa] for pa in random_grid.keys()])
     best_clf = tuning_guy.best_estimator_
     y_pred = best_clf.predict(X_test)
     f1 = f1_score(y_test, y_pred, average="weighted")
-    return (f1, tuning_guy.best_score_, tuning_guy.best_params_)
+    return (f1, tuning_guy.best_score_, tuning_guy.best_params_, csvs)
 
 
 if __name__ == "__main__":
-    for m, k in models:
-        test_f1, best_train_score, best_params = parameterTuning(
-            estimators[k], grids[k]
+    for m, k in models.items():
+        print(m)
+        print(k)
+        test_f1, best_train_score, best_params, output_csv = parameterTuning(
+            estimators[k], grids[k], X_train, y_train
         )
-    print(
-        """for modle %s, the test f1 is %s, training score is %s and the
+        print(
+            """for modle %s, the test f1 is %s, training score is %s and the
           params is:"""
-        % (m, test_f1, best_train_score)
-    )
-    print(best_params)
+            % (m, test_f1, best_train_score)
+        )
+        print(best_params)
+        with open("output_%s.csv" % (m), "w") as result_file:
+            wr = csv.writer(result_file)
+            wr.writerows(output_csv)
