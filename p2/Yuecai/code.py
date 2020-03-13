@@ -34,8 +34,8 @@ ch2 = SelectKBest(chi2, k=5000)
 X_train = ch2.fit_transform(X_train, y_train)
 X_test = ch2.transform(X_test)
 
-models = {"RF": 0, "AdaBoost": 1, "linearSVM": 2}
-#models = {"linearSVM": 2}
+#models = {"RF": 0, "AdaBoost": 1, "linearSVM": 2}
+models = {"linearSVM": 2}
 estimators = [
     RandomForestClassifier(),
     AdaBoostClassifier(),
