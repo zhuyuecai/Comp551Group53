@@ -15,6 +15,20 @@ from sklearn.feature_selection import SelectKBest, chi2
 import numpy as np
 from sklearn.metrics import f1_score
 
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import SGDClassifier
+from sklearn import metrics
+
+def make_pipeline(estimator):
+    text_clf = Pipeline([
+        ('vect', CountVectorizer()),
+        ('tfidf', TfidfTransformer()),
+        ('clf', estimator)
+    ])
+    return text_clf
 
 logging.basicConfig(filename='app.log', level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 X_train, y_train = fetch_20newsgroups(
@@ -34,12 +48,19 @@ ch2 = SelectKBest(chi2, k=5000)
 X_train = ch2.fit_transform(X_train, y_train)
 X_test = ch2.transform(X_test)
 
-#models = {"RF": 0, "AdaBoost": 1, "linearSVM": 2}
-models = {"linearSVM": 2}
+models = {"RF": 0,
+          "AdaBoost": 1,
+          "linearSVM": 2,
+          "Logistic": 3,
+          "DecisionTree": 4}
+#models = {"linearSVM": 2}
 estimators = [
     RandomForestClassifier(),
     AdaBoostClassifier(),
+    #LinearSVC(penalty=penalty, dual=False, tol=1e-3),
     LinearSVC(),
+    LogisticRegression(),
+    DecisionTreeClassifier(),
 ]
 
 # Number of trees in random forest
@@ -61,14 +82,25 @@ ada_grid = {
     "algorithm": ["SAMME", "SAMME.R"],
 }
 
-
 svc_grid = {
     "penalty": ["l1", "l2"],
     "loss": ["hinge", "squared_hinge"],
     "multi_class": ["ovr", "crammer_singer"],
 }
 
-grids = [rf_grid, ada_grid, svc_grid]
+logistic_grid = {
+    #"classifier": [LogisticRegression()],
+    "n_estimators": n_estimators,
+    "penalty": ["l1", "l2"],
+    "C": np.logspace(-3, 3, 7),
+}
+
+tree_grid = {
+    'criterion': ['gini', 'entropy'],
+    #'max_depth': [4,5,6,7,8,9,10,11,12,15,20,30,40,50,70,90,120,150],
+}
+
+grids = [rf_grid, ada_grid, svc_grid, logistic_grid, tree_grid]
 
 
 def parameterTuning(clf, random_grid, x, y):
@@ -103,9 +135,8 @@ if __name__ == "__main__":
             estimators[k], grids[k], X_train, y_train
         )
         print(
-            """for modle %s, the test f1 is %s, training score is %s and the
+            f"""for model {m}, the test f1 is {test_f1}, training score is {best_train_score} and the
           params is:"""
-            % (m, test_f1, best_train_score)
         )
         print(best_params)
         with open("output_%s.csv" % (m), "w") as result_file:
