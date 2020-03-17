@@ -1,0 +1,52 @@
+Some notes from reasearching:
+
+Difficult part of text classification is modelling the data (sparsity problems)?
+
+Feature selection (TF, IDF, chi-squared, info gain, gain rate, essential word, odds ratio, ...)
+
+SVM seems popular in general with either comparable performance in various metrics or excellent (some mention accuracy though it is not always the best, but tends to be bested by models which we do not use here)
+
+(PDF) pages refer to document pages of the PDF viewer
+(print) pages refer to the "real" page from the publication it was taken from (i.e. the page that is actually written)
+
+1
+https://www.irjet.net/archives/V4/i3/IRJET-V4I3651.pdf
+p3 (PDF)
+p2515 (print)
+
+2
+https://www.researchgate.net/publication/290922535_An_empirical_comparison_of_text_categorization_methods
+
+3
+https://arxiv.org/pdf/1909.05478.pdf
+p5 (PDF)
+
+4
+https://pdfs.semanticscholar.org/d46b/cfcf9f5b602aa7cd337e040ed059b54141d0.pdf
+p9 (PDF)
+p51 (print)
+
+5
+https://www.researchgate.net/publication/332321070_Movies_Reviews_Sentiment_Analysis_and_Classification
+p2-3,5 (PDF)
+Uses IMDB dataset
+Random Forest has best performance here
+
+6
+https://www.researchgate.net/profile/V_Tampakas/publication/228084521_Text_Classification_Using_Machine_Learning_Techniques/links/0c96051ee1dfda0e74000000.pdf
+p6 (PDF)
+Old source (2005)
+"Their results show that overall,  SVMs  and  k-NN  LSI  perform  better  than  the other methods, in a statistically significant way." where 'their' refers to another study above (link 2)
+
+7
+http://www.jmlr.org/papers/volume2/tong01a/tong01a.pdf
+Specifically about SVM
+
+8
+http://www.jmlr.org/papers/volume3/forman03a/forman03a.pdf
+p1,3,9 (PDF)
+p1289,1291,1297 (print)
+
+9
+https://www.researchgate.net/publication/318056374_Comparison_of_Naive_Bayes_Random_Forest_Decision_Tree_Support_Vector_Machines_and_Logistic_Regression_Classifiers_for_Text_Reviews_Classification
+p229 (print)

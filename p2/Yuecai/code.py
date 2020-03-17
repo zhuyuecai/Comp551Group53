@@ -53,12 +53,11 @@ models = {"RF": 0,
           "linearSVM": 2,
           "Logistic": 3,
           "DecisionTree": 4}
-#models = {"linearSVM": 2}
+
 estimators = [
     RandomForestClassifier(),
     AdaBoostClassifier(),
-    #LinearSVC(penalty=penalty, dual=False, tol=1e-3),
-    LinearSVC(),
+    LinearSVC(),#penalty=penalty, dual=False, tol=1e-3),
     LogisticRegression(),
     DecisionTreeClassifier(),
 ]
@@ -89,15 +88,18 @@ svc_grid = {
 }
 
 logistic_grid = {
-    #"classifier": [LogisticRegression()],
-    "n_estimators": n_estimators,
     "penalty": ["l1", "l2"],
-    "C": np.logspace(-3, 3, 7),
+    "C": [0.01, 0.1, 1,10,50,100],
+    "dual": [True, False],
+    "fit_intercept": [True, False],
 }
 
 tree_grid = {
     'criterion': ['gini', 'entropy'],
-    #'max_depth': [4,5,6,7,8,9,10,11,12,15,20,30,40,50,70,90,120,150],
+    "splitter" : ["best", "random"],
+    "max_depth": [1, 5, 10, 20, 40, 60, 80, 100, 120, 150, 200],
+    "min_samples_split": [2, 5, 10],
+    "max_features": [0.01,0.1,0.2,0.4,0.8],
 }
 
 grids = [rf_grid, ada_grid, svc_grid, logistic_grid, tree_grid]
